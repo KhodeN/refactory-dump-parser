@@ -1,0 +1,25 @@
+{
+  "name": "refactory-dump-parser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/run.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/csv-parse": "^1.2.2",
+    "@types/node-fetch": "^2.5.12",
+    "jest": "^27.0.6",
+    "ts-node": "^10.2.0",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "csv-parse": "^4.16.0",
+    "node-fetch": "^2.6.1",
+    "tslib": "^2.3.1"
+  }
+}
