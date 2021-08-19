@@ -27,10 +27,29 @@ export class CsvParser {
 
     result.push(current); // last value
 
-    return result.map(v => v.trim());
+    return result.map((v) => v.trim());
   }
 
   public static parseSection<T>(text: string): T[] {
-    return [];
+    const notEmptyRows = text
+      .split("\n")
+      .filter((row) => row.length > 0 && !row.startsWith(","));
+
+    const [headRow, ...rows] = notEmptyRows;
+    const headers = CsvParser.parseRow(headRow);
+
+    return rows.map((row) => {
+      const values = CsvParser.parseRow(row);
+
+      return headers.reduce((acc: any, header, i) => {
+        if (!header) {
+          return acc;
+        }
+
+        acc[header] = values[i];
+
+        return acc;
+      }, {} as T);
+    });
   }
 }
