@@ -1,49 +1,44 @@
-import * as fs from "fs";
-import fetch from "node-fetch";
+import { downloadFile } from "./helpers";
 
 export class Application {
-    private baseUrl = "https://re-factory.ru/files/mods/";
-    private savePath = "./in";
+  private baseUrl = "https://re-factory.ru/files/mods/";
 
-    public async run() {
-        await this.downloadDump();
-        await this.csv2json();
-        await this.createIconSprite();
-        await this.convertToFactorioLabFormat();
+  private savePath = "./in";
+
+  public async run() {
+    await this.downloadDump();
+    await this.csv2json();
+    await this.createIconSprite();
+    await this.convertToFactorioLabFormat();
+  }
+
+  private async downloadDump() {
+    console.log("Downloading dumps");
+    console.log("SKIPPED");
+    return;
+
+    const files = [
+      "config_resources.csv",
+      "config_research.csv",
+      "config_entities.csv",
+    ];
+
+    for (const file of files) {
+      await downloadFile(`${this.baseUrl}/${file}`, `${this.savePath}/${file}`);
     }
 
-    private async downloadDump() {
-        console.log('Downloading dumps');
-        console.log('SKIPPED');
-        return;
+    console.log();
+  }
 
-        const files = [
-            "config_resources.csv",
-            "config_research.csv",
-            "config_entities.csv",
-        ];
+  private async csv2json() {
+    console.warn("TODO `csv2json` not implemented");
+  }
 
-        for (const file of files) {
-            const resp = await fetch(`${this.baseUrl}/${file}`);
-            const savePath = `${this.savePath}/${file}`;
-            const dest = fs.createWriteStream(savePath);
-            resp.body.pipe(dest);
+  private async createIconSprite() {
+    console.warn("TODO `createIconSprite` not implemented");
+  }
 
-            console.log(`"${savePath}" downloaded`)
-        }
-
-        console.log();
-    }
-
-    private async csv2json() {
-        console.warn("TODO `csv2json` not implemented");
-    }
-
-    private async createIconSprite() {
-        console.warn("TODO `createIconSprite` not implemented");
-    }
-
-    private async convertToFactorioLabFormat() {
-        console.warn("TODO `convertToFactorioLabFormat` not implemented");
-    }
+  private async convertToFactorioLabFormat() {
+    console.warn("TODO `convertToFactorioLabFormat` not implemented");
+  }
 }
