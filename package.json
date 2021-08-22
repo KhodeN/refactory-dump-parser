@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "csv-parse": "^4.16.0",
+    "jimp": "^0.16.1",
     "node-fetch": "^2.6.1",
     "tslib": "^2.3.1"
   }

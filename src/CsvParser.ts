@@ -35,13 +35,19 @@ export class CsvParser {
       .split("\n")
       .filter((row) => row.length > 0 && !row.startsWith(","));
 
+    const result: T[] = [];
+
     const [headRow, ...rows] = notEmptyRows;
-    const headers = CsvParser.parseRow(headRow);
+    let headers = CsvParser.parseRow(headRow);
 
-    return rows.map((row) => {
+    for (const row of rows) {
       const values = CsvParser.parseRow(row);
+      if (values[0].toLowerCase() === "sid") {
+        headers = values;
+        continue;
+      }
 
-      return headers.reduce((acc: any, header, i) => {
+      const record = headers.reduce((acc: any, header, i) => {
         if (!header) {
           return acc;
         }
@@ -50,6 +56,14 @@ export class CsvParser {
 
         return acc;
       }, {} as T);
-    });
+
+      result.push(record);
+    }
+
+    return result;
+  }
+
+  public static parseFile<T>(text: string): T[] {
+    return CsvParser.parseSection(text); // TODO Split to sections
   }
 }

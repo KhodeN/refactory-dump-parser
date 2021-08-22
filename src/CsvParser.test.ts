@@ -25,31 +25,31 @@ describe("CsvParser", () => {
 
   describe("parseSection", () => {
     interface Record {
-      Sid: string;
-      Note: string;
-      Sort: string;
-      Research: string;
       Ingredients: string;
-      MaxHp: string;
       MaxBeltLength: string;
+      MaxHp: string;
+      Note: string;
+      Research: string;
+      Sid: string;
+      Sort: string;
     }
 
     interface Resource {
-      sid: string;
-      note: string;
       heat_energy: string;
       min_required: string;
-      sort: string;
-      recipe1_group: string;
+      note: string;
       recipe1_count: string;
       recipe1_duration: string;
-      recipe1_sources: string;
+      recipe1_group: string;
       recipe1_research: string;
-      recipe2_group: string;
+      recipe1_sources: string;
       recipe2_count: string;
       recipe2_duration: string;
-      recipe2_sources: string;
+      recipe2_group: string;
       recipe2_research: string;
+      recipe2_sources: string;
+      sid: string;
+      sort: string;
     }
 
     // language=csv
@@ -67,10 +67,28 @@ IronPlate,,IronPlate.png|Железные пластины|Iron plates,,250,2.01
 IronDetails,,IronDetails.png|Железные детали|Iron parts,,250,3.01,,Constructor,3,5.5,IronPlate*2,,,,,,,
 CopperOre,,CopperOre.png|Медная руда|Copper ore,,,1.02,,MiningUnderground,1,3,Mining*0,,,,,,,`;
 
+    const differentStructures = `Sid,Note,Sort,Research,Ingredients,MaxHp,ConnectRadius,,,,,,,,
+electricity.pole.1,ElectricPillar.png|Электрический столб|Electric pole,3.04,,StoneBrick*5;CopperCable*6,10,5,,,,,,,,
+electricity.pole.ship,ElectricPillar.png|Электрический столб|Electric pole,-4.004,,,0,15,,,,,,,,
+Sid,Note,Sort,Research,Ingredients,MaxHp,ElectricityPower,SpeedScale,DurationSeconds,NeedHeatEnergy,NeedWater,,,,
+electricity.heat.lvl1,FuelGenerator.png|Топливный генератор (ур. 1)|Fuel generator (lev. 1),3.51,electronic1,StoneBrick*30;IronPlate*40;CopperCable*50,200,30,1,6,5,0,,,,
+electricity.heat.lvl2,FuelGenerator_2.png|Топливный генератор (ур. 2)|Fuel generator (lev. 2),3.51,electronic1,StoneBrick*50;SteelPlate*10;Electronic*20,200,40,1,6,3,0,,,,
+electricity.heat.lvl3,FuelGenerator_3.png|Топливный генератор (ур. 3)|Fuel generator (lev. 3),3.51,microelectronics,SteelGirder*20;SteelDetails*40;Microcircuit*10,200,50,1,6,1,0,,,,
+!electricity.heat.big.1,<no_icon>|Теплоэлектростанция|Thermal power plant,3.52,,Concrete*100;EnergyBattery*150;OpticalResonator*60,500,200,1,6,2,2,,,,
+electricity.endless_power.spaceship,Spaceship_Energyblock.png|Корабельный генератор|Shipboard power unit,-4.003,,CopperCable*50;EnergyBattery*40,0,45,1,10,0,0,,,,
+Sid,Note,Sort,Research,Ingredients,MaxHp,ElectricityPower,SpeedScale,MinDistanceBetweenWindmills,,,,,,
+electricity.wind.1,Windmill.png|Ветрогенератор|Wind turbine,3.53,wind,CopperCable*100;SteelDetails*60;Electronic*50,200,40,1,25,,,,,,
+Sid,Note,Sort,Research,Ingredients,MaxHp,ElectricityPower,SpeedScale,,,,,,,
+!electricity.solarpanel.1,<no_icon>|Солнечная панель|Solar panel,3.54,solar,CopperPlate*28;SteelPlate*5;Glass*10,100,10,1,,,,,,,
+Sid,Note,Sort,Research,Ingredients,MaxHp,ElectricityPower,MaxWorkTime,ElectricityConsumption,ExplosionRadius,Damage,UpgradeToTrapSid,,,
+electricity.battery.1,Accumulator.png|Аккумулятор|Battery,3.61,accumulator,CarbonDust*50;EnergyBattery*30,100,10,600,10,5,200,fireball.trap,,,
+Sid,Note,Sort,Research,Ingredients,MaxHp,ElectricityConsumption,,,,,,,,
+!electricity.lamp.test,<no_icon>|Лампа|Floodlight,3.71,,CopperCable*2;Glass*2,1,10,,,,,,,,`;
+
     it("should parse lines", () => {
       const result = CsvParser.parseSection<Record>(section);
       expect(result.length).toBe(6);
-      console.table(result);
+      // console.table(result);
     });
 
     it("should skip empty rows", () => {
@@ -84,6 +102,142 @@ variable,note`);
     it("should parse lines 2", () => {
       const result = CsvParser.parseSection<Resource>(section2);
       expect(result.length).toBe(4);
+      // console.table(result);
+    });
+
+    it("should parse different structures", () => {
+      const result = CsvParser.parseFile(differentStructures);
+      expect(result).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "ConnectRadius": "5",
+    "Ingredients": "StoneBrick*5;CopperCable*6",
+    "MaxHp": "10",
+    "Note": "ElectricPillar.png|Электрический столб|Electric pole",
+    "Research": "",
+    "Sid": "electricity.pole.1",
+    "Sort": "3.04",
+  },
+  Object {
+    "ConnectRadius": "15",
+    "Ingredients": "",
+    "MaxHp": "0",
+    "Note": "ElectricPillar.png|Электрический столб|Electric pole",
+    "Research": "",
+    "Sid": "electricity.pole.ship",
+    "Sort": "-4.004",
+  },
+  Object {
+    "DurationSeconds": "6",
+    "ElectricityPower": "30",
+    "Ingredients": "StoneBrick*30;IronPlate*40;CopperCable*50",
+    "MaxHp": "200",
+    "NeedHeatEnergy": "5",
+    "NeedWater": "0",
+    "Note": "FuelGenerator.png|Топливный генератор (ур. 1)|Fuel generator (lev. 1)",
+    "Research": "electronic1",
+    "Sid": "electricity.heat.lvl1",
+    "Sort": "3.51",
+    "SpeedScale": "1",
+  },
+  Object {
+    "DurationSeconds": "6",
+    "ElectricityPower": "40",
+    "Ingredients": "StoneBrick*50;SteelPlate*10;Electronic*20",
+    "MaxHp": "200",
+    "NeedHeatEnergy": "3",
+    "NeedWater": "0",
+    "Note": "FuelGenerator_2.png|Топливный генератор (ур. 2)|Fuel generator (lev. 2)",
+    "Research": "electronic1",
+    "Sid": "electricity.heat.lvl2",
+    "Sort": "3.51",
+    "SpeedScale": "1",
+  },
+  Object {
+    "DurationSeconds": "6",
+    "ElectricityPower": "50",
+    "Ingredients": "SteelGirder*20;SteelDetails*40;Microcircuit*10",
+    "MaxHp": "200",
+    "NeedHeatEnergy": "1",
+    "NeedWater": "0",
+    "Note": "FuelGenerator_3.png|Топливный генератор (ур. 3)|Fuel generator (lev. 3)",
+    "Research": "microelectronics",
+    "Sid": "electricity.heat.lvl3",
+    "Sort": "3.51",
+    "SpeedScale": "1",
+  },
+  Object {
+    "DurationSeconds": "6",
+    "ElectricityPower": "200",
+    "Ingredients": "Concrete*100;EnergyBattery*150;OpticalResonator*60",
+    "MaxHp": "500",
+    "NeedHeatEnergy": "2",
+    "NeedWater": "2",
+    "Note": "<no_icon>|Теплоэлектростанция|Thermal power plant",
+    "Research": "",
+    "Sid": "!electricity.heat.big.1",
+    "Sort": "3.52",
+    "SpeedScale": "1",
+  },
+  Object {
+    "DurationSeconds": "10",
+    "ElectricityPower": "45",
+    "Ingredients": "CopperCable*50;EnergyBattery*40",
+    "MaxHp": "0",
+    "NeedHeatEnergy": "0",
+    "NeedWater": "0",
+    "Note": "Spaceship_Energyblock.png|Корабельный генератор|Shipboard power unit",
+    "Research": "",
+    "Sid": "electricity.endless_power.spaceship",
+    "Sort": "-4.003",
+    "SpeedScale": "1",
+  },
+  Object {
+    "ElectricityPower": "40",
+    "Ingredients": "CopperCable*100;SteelDetails*60;Electronic*50",
+    "MaxHp": "200",
+    "MinDistanceBetweenWindmills": "25",
+    "Note": "Windmill.png|Ветрогенератор|Wind turbine",
+    "Research": "wind",
+    "Sid": "electricity.wind.1",
+    "Sort": "3.53",
+    "SpeedScale": "1",
+  },
+  Object {
+    "ElectricityPower": "10",
+    "Ingredients": "CopperPlate*28;SteelPlate*5;Glass*10",
+    "MaxHp": "100",
+    "Note": "<no_icon>|Солнечная панель|Solar panel",
+    "Research": "solar",
+    "Sid": "!electricity.solarpanel.1",
+    "Sort": "3.54",
+    "SpeedScale": "1",
+  },
+  Object {
+    "Damage": "200",
+    "ElectricityConsumption": "10",
+    "ElectricityPower": "10",
+    "ExplosionRadius": "5",
+    "Ingredients": "CarbonDust*50;EnergyBattery*30",
+    "MaxHp": "100",
+    "MaxWorkTime": "600",
+    "Note": "Accumulator.png|Аккумулятор|Battery",
+    "Research": "accumulator",
+    "Sid": "electricity.battery.1",
+    "Sort": "3.61",
+    "UpgradeToTrapSid": "fireball.trap",
+  },
+  Object {
+    "ElectricityConsumption": "10",
+    "Ingredients": "CopperCable*2;Glass*2",
+    "MaxHp": "1",
+    "Note": "<no_icon>|Лампа|Floodlight",
+    "Research": "",
+    "Sid": "!electricity.lamp.test",
+    "Sort": "3.71",
+  },
+]
+`);
       console.table(result);
     });
   });
