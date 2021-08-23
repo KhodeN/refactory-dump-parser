@@ -1,8 +1,8 @@
 import { CsvParser } from "./CsvParser";
-import { downloadFile, readFile, writeFile } from "./helpers";
+import { downloadFile, readFile, readJson, writeJson } from "./helpers";
 import { IconSprite } from "./IconSprite";
 
-const FILES = [
+const CSV_FILES = [
   "config_resources.csv",
   "config_research.csv",
   "config_entities.csv",
@@ -10,6 +10,8 @@ const FILES = [
 
 export class Application {
   private baseUrl = "https://re-factory.ru/files/mods/";
+
+  private outPath = "./out";
 
   private savePath = "./in";
 
@@ -32,11 +34,10 @@ export class Application {
     const icons = new Set<string>();
 
     // Parse icons
-    for (const file of FILES) {
-      const raw = await readFile(
+    for (const file of CSV_FILES) {
+      const content = await readJson(
         `${this.savePath}/${file.replace(".csv", ".json")}`
       );
-      const content = JSON.parse(raw);
       for (const record of content) {
         const note = record.Note || record.note || "";
         const parts = note.split("|");
@@ -49,8 +50,15 @@ export class Application {
       }
     }
 
-    const sprite = new IconSprite(icons, 64, this.baseUrl, this.savePath);
-    sprite.download();
+    // Download icons
+    for (const icon of Array.from(icons)) {
+      await downloadFile(
+        `${this.baseUrl}/icons/${icon}`,
+        `${this.savePath}/icons/${icon}`
+      );
+    }
+
+    const sprite = new IconSprite(icons, 64, this.savePath);
     sprite.generate(`${this.savePath}/sprite.png`);
 
     console.log();
@@ -61,12 +69,12 @@ export class Application {
     console.log("SKIPPED");
     return;
 
-    for (const file of FILES) {
+    for (const file of CSV_FILES) {
       const content = await readFile(`${this.savePath}/${file}`);
       const records = CsvParser.parseFile(content);
-      await writeFile(
+      await writeJson(
         `${this.savePath}/${file.replace(".csv", ".json")}`,
-        JSON.stringify(records, null, 2)
+        records
       );
     }
 
@@ -78,7 +86,7 @@ export class Application {
     console.log("SKIPPED");
     return;
 
-    for (const file of FILES) {
+    for (const file of CSV_FILES) {
       await downloadFile(`${this.baseUrl}/${file}`, `${this.savePath}/${file}`);
     }
 
