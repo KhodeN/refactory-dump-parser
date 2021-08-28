@@ -1,6 +1,14 @@
 import { CsvParser } from "./CsvParser";
-import { downloadFile, readFile, readJson, writeJson } from "./helpers";
+import {
+  copyFile,
+  downloadFile,
+  parseNote,
+  readFile,
+  readJson,
+  writeJson,
+} from "./helpers";
 import { IconSprite } from "./IconSprite";
+import { Store } from "./Store";
 
 const CSV_FILES = [
   "config_resources.csv",
@@ -23,7 +31,18 @@ export class Application {
   }
 
   private async convertToFactorioLabFormat() {
-    console.warn("TODO `convertToFactorioLabFormat` not implemented");
+    const [resources, research, entities] = await Promise.all(
+      CSV_FILES.map((file) =>
+        readJson(`${this.savePath}/${file.replace(".csv", ".json")}`)
+      )
+    );
+
+    const icons = await readJson(`${this.savePath}/sprite.json`);
+
+    const store = new Store(resources, research, entities, icons);
+
+    await writeJson(`${this.outPath}/data.json`, store.toJSON());
+    await copyFile(`${this.savePath}/sprite.png`, `${this.outPath}/icons.png`);
   }
 
   private async createIconSprite() {
@@ -39,13 +58,9 @@ export class Application {
         `${this.savePath}/${file.replace(".csv", ".json")}`
       );
       for (const record of content) {
-        const note = record.Note || record.note || "";
-        const parts = note.split("|");
-        if (parts.length === 3) {
-          const [icon, ruTitle, enTitle] = parts;
-          if (icon.endsWith(".png")) {
-            icons.add(icon);
-          }
+        const { icon } = parseNote(record.Note || record.note || "");
+        if (icon) {
+          icons.add(icon!); // TODO why nullable?
         }
       }
     }

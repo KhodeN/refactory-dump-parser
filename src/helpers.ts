@@ -26,9 +26,30 @@ export async function writeJson(file: string, data: any) {
   await writeFile(file, JSON.stringify(data, null, 2));
 }
 
+export async function copyFile(from: string, to: string) {
+  fs.copyFileSync(from, to);
+}
+
 export function rgbaToHex(color: RGBA): string {
   const hex = (c: number) => c.toString(16);
   const parts = [color.r, color.g, color.b, color.a];
 
   return `#${parts.map(hex)}`;
+}
+
+export interface Note {
+  enTitle: string;
+  icon: string | null;
+  ruTitle: string;
+}
+
+export function parseNote(note: string): Note {
+  const parts = note.split("|");
+  if (parts.length === 3) {
+    const [icon, ruTitle, enTitle] = parts;
+
+    return { icon: icon.endsWith(".png") ? icon : null, ruTitle, enTitle };
+  }
+
+  return { icon: null, ruTitle: "", enTitle: "" };
 }
