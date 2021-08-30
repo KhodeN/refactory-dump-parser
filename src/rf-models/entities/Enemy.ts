@@ -64,4 +64,4 @@ interface Enemy5 {
   SpeedScale: string;
 }
 
-type Enemy = Enemy1 | Enemy2 | Enemy3 | Enemy4 | Enemy5;
+export type Enemy = Enemy1 | Enemy2 | Enemy3 | Enemy4 | Enemy5;
