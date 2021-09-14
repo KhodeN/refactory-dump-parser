@@ -24,11 +24,11 @@ export interface RawResource {
 }
 
 export class Resource {
+  public icon: Icon | null = null;
+
   public id: string;
 
   public name: string;
-
-  public icon: Icon | null = null;
 
   constructor(private raw: RawResource, spriteData: SpriteData) {
     this.id = raw.sid;

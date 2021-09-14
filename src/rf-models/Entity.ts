@@ -53,11 +53,11 @@ export type RawEntity =
 type ProductionEntity = Mining | Factory | Mill;
 
 export class Entity {
+  public icon: Icon | null = null;
+
   public id: string;
 
   public name: string;
-
-  public icon: Icon | null = null;
 
   constructor(private raw: RawEntity, private spriteData: SpriteData) {
     this.id = raw.Sid;
