@@ -37,7 +37,6 @@ export class IconSprite {
     }
 
     await canvas.write(spriteFile);
-
     await writeJson(spriteFile.replace(".png", ".json"), iconData);
   }
 

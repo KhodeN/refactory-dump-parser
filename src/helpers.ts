@@ -1,8 +1,17 @@
 import type { RGBA } from "@jimp/core/types/etc";
 import fs from "fs";
 import fetch from "node-fetch";
+import path from "path";
+
+export async function sureDirectoryExist(filePath: string) {
+  const dir = path.dirname(filePath);
+  // console.log("sureDirectoryExist", dir);
+  await fs.promises.mkdir(dir, { recursive: true });
+}
 
 export async function downloadFile(url: string, savePath: string) {
+  await sureDirectoryExist(savePath);
+
   const resp = await fetch(url);
   const dest = fs.createWriteStream(savePath);
   resp.body.pipe(dest);
@@ -19,6 +28,8 @@ export async function readJson(file: string) {
 }
 
 async function writeFile(savePath: string, content: string) {
+  await sureDirectoryExist(savePath);
+
   fs.writeFileSync(savePath, content, { encoding: "utf-8" });
 }
 
@@ -27,6 +38,8 @@ export async function writeJson(file: string, data: any) {
 }
 
 export async function copyFile(from: string, to: string) {
+  await sureDirectoryExist(to);
+
   fs.copyFileSync(from, to);
 }
 
@@ -34,7 +47,7 @@ export function rgbaToHex(color: RGBA): string {
   const hex = (c: number) => c.toString(16);
   const parts = [color.r, color.g, color.b, color.a];
 
-  return `#${parts.map(hex)}`;
+  return `#${parts.map(hex).join("")}`;
 }
 
 export interface Note {
@@ -52,4 +65,47 @@ export function parseNote(note: string): Note {
   }
 
   return { icon: null, ruTitle: "", enTitle: "" };
+}
+
+export function logAsyncMethod(humanName: string) {
+  return function <F extends Function>(
+    _target: any,
+    name: string,
+    descriptor: TypedPropertyDescriptor<F>
+  ): TypedPropertyDescriptor<F> {
+    const { enumerable, configurable, value } = descriptor;
+
+    return {
+      configurable,
+      enumerable,
+
+      get() {
+        const that = this;
+
+        async function wrapped(...args: any[]) {
+          console.log();
+          console.log(humanName);
+          try {
+            await value!.call(that, ...args);
+          } catch (e) {
+            throw new Error(`Error on ${name}(${args.join(", ")}): 
+${e.message}
+${e.stack}`);
+          }
+        }
+
+        return wrapped as any;
+      },
+
+      // tslint:disable-next-line:no-shadowed-variable
+      set(value: F) {
+        Object.defineProperty(this, name, {
+          configurable: true,
+          enumerable: true,
+          value,
+          writable: true,
+        });
+      },
+    };
+  };
 }

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/run.ts",
+    "start": "ts-node src/run.ts && cp -r ./out/ ../factorio-lab/src/data/rf/",
     "reformat": "prettier --no-config -w src/",
     "test": "jest"
   },
