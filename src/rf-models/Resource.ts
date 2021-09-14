@@ -1,9 +1,9 @@
-import { Icon } from "../fl-models/Icon";
 import { Item } from "../fl-models/Item";
 import { ItemId } from "../fl-models/ItemId";
 import { Recipe } from "../fl-models/Recipe";
 import { parseNote } from "../helpers";
-import { pos, SpriteData } from "./SpriteData";
+import { BaseEntity } from "./BaseEntity";
+import { SpriteData } from "./SpriteData";
 
 export interface RawResource {
   heat_energy: string;
@@ -23,30 +23,23 @@ export interface RawResource {
   sort: string;
 }
 
-export class Resource {
-  public icon: Icon | null = null;
-
+export class Resource extends BaseEntity {
   public id: string;
 
   public name: string;
 
   constructor(private raw: RawResource, spriteData: SpriteData) {
+    super();
+
     this.id = raw.sid;
 
     const { icon, enTitle } = parseNote(raw.note);
 
     this.name = enTitle;
 
-    if (icon) {
-      const spriteIcon = spriteData[icon];
-      if (spriteIcon) {
-        this.icon = {
-          color: spriteIcon.color,
-          id: this.id,
-          position: `${pos(spriteIcon.x)}px ${pos(spriteIcon.y)}px`,
-        };
-      }
-    }
+    this.setIcon(this.id, icon, spriteData);
+
+    this.parseSort(raw.sort);
   }
 
   public toItem(): Item {
@@ -56,7 +49,7 @@ export class Resource {
       id: this.id,
       name: this.name,
       category: "resources",
-      stack: 1, // TODO ?
+      stack: 1, // not actual for the game
       row: parseInt(row, 10),
     };
   }

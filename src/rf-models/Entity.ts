@@ -1,6 +1,6 @@
-import { Icon } from "../fl-models/Icon";
 import { Item } from "../fl-models/Item";
 import { parseNote } from "../helpers";
+import { BaseEntity } from "./BaseEntity";
 import { Barrack } from "./entities/Barrack";
 import { Bomb } from "./entities/Bomb";
 import { BuildingYard } from "./entities/BuildingYard";
@@ -24,7 +24,7 @@ import { Platform } from "./entities/Platform";
 import { Spaceport } from "./entities/Spaceport";
 import { Storage } from "./entities/Storage";
 import { Turret } from "./entities/Turret";
-import { pos, SpriteData } from "./SpriteData";
+import { SpriteData } from "./SpriteData";
 
 export type RawEntity =
   | Barrack
@@ -52,61 +52,67 @@ export type RawEntity =
   | Turret;
 type ProductionEntity = Mining | Factory | Mill;
 
-export class Entity {
-  public icon: Icon | null = null;
-
+export class Entity extends BaseEntity {
   public id: string;
 
   public name: string;
 
-  constructor(private raw: RawEntity, private spriteData: SpriteData) {
+  constructor(private raw: RawEntity, spriteData: SpriteData) {
+    super();
+
     this.id = raw.Sid;
     const { icon, enTitle } = parseNote(raw.Note);
 
     this.name = enTitle;
 
-    if (icon) {
-      const spriteIcon = spriteData[icon];
-      if (spriteIcon) {
-        this.icon = {
-          color: spriteIcon.color,
-          id: this.id,
-          position: `${pos(spriteIcon.x)}px ${pos(spriteIcon.y)}px`,
-        };
-      }
-    }
+    this.setIcon(this.id, icon, spriteData);
+
+    this.parseSort(raw.Sort);
   }
 
   public toItem(): Item {
-    const [row, column] = this.raw.Sort.split(".");
-
     const item: Item = {
       id: this.id,
       name: this.name,
       category: "entities",
-      stack: 1, // TODO ?
-      row: parseInt(row, 10),
+      stack: 1, // not actual for the game
+      row: this.row,
     };
 
-    // for belts
-    if (this.id.includes("belt")) {
+    // belts
+    if (this.id === "belt.belt1") {
       item.belt = {
-        speed: 3,
+        speed: 3, // 180 items/m
       };
     }
 
+    if (this.id === "belt.belt2") {
+      item.belt = {
+        speed: 6, // 360 items/m
+      };
+    }
+
+    if (this.id === "belt.belt3") {
+      item.belt = {
+        speed: 12, // 720 items/m
+      };
+    }
+
+    // factories
     const productionGroup = this.getProductionGroup();
     if (productionGroup) {
       const productionRawEntity = this.raw as ProductionEntity;
       item.factory = {
         type: "electric",
+        mining: this.id.startsWith("mining") ? true : undefined,
         speed: parseInt(productionRawEntity.SpeedScale, 10),
         category: productionGroup,
         modules: 0,
-        usage: 10,
+        usage: parseInt(productionRawEntity.ElectricityConsumption, 10),
       };
     }
 
+    // drones
     if (this.id === "sawmill.drone1") {
       item.factory = {
         type: "electric",

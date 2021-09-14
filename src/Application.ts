@@ -33,9 +33,9 @@ export class Application {
   @logAsyncMethod("Application:")
   public async run() {
     // await this.downloadDump();
-    await this.csv2json();
+    // await this.csv2json();
     // await this.downloadIcons();
-    await this.createIconSprite();
+    // await this.createIconSprite();
     await this.convertToFactorioLabFormat();
 
     console.log(`\nDone. Files are available in ${this.outPath}`);
