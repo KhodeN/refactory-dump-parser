@@ -14,10 +14,10 @@ export class Store {
   public resources: Resource[];
 
   constructor(
-     rawResources: RawResource[],
-     rawResearch: RawResearch[],
-     rawEntities: RawEntity[],
-     private spriteData: SpriteData
+    rawResources: RawResource[],
+    rawResearch: RawResearch[],
+    rawEntities: RawEntity[],
+    private spriteData: SpriteData
   ) {
     this.resources = rawResources.map((raw) => new Resource(raw, spriteData));
     this.research = rawResearch.map((raw) => new Research(raw, spriteData));
@@ -26,55 +26,83 @@ export class Store {
 
   public toJSON(): FactorioLabData {
     const productionGroups = Array.from(
-       new Set(
-          this.entities.reduce((acc, e) => {
-            const pg = e.getProductionGroup();
-            if (pg) {
-              acc.push(pg);
-            }
+      new Set(
+        this.entities.reduce((acc, e) => {
+          const pg = e.getProductionGroup();
+          if (pg) {
+            acc.push(pg);
+          }
 
-            return acc;
-          }, [] as string[])
-       )
+          return acc;
+        }, [] as string[])
+      )
     );
 
     const productionGroupsMap = new Map<string, string[]>(
-       productionGroups.map((group) => [
-         group,
-         this.entities.reduce((acc, e) => {
-           const pg = e.getProductionGroup();
-           if (pg === group) {
-             acc.push(e.id);
-           }
+      productionGroups.map((group) => [
+        group,
+        this.entities.reduce((acc, e) => {
+          const pg = e.getProductionGroup();
+          if (pg === group) {
+            acc.push(e.id);
+          }
 
-           return acc;
-         }, [] as string[]),
-       ])
+          return acc;
+        }, [] as string[]),
+      ])
     );
     productionGroupsMap.set("SawmillDrone", ["sawmill.drone1"]);
     productionGroupsMap.set("BuildingYardDrone", ["sawmill.drone1"]);
 
     const recipes = this.resources
-       .map((r) => r.toRecipes(productionGroupsMap))
-       .flat();
+      .map((r) => r.toRecipes(productionGroupsMap))
+      .flat();
 
     const producers = new Set(recipes.map((r) => r.producers).flat());
     const directAddEntities = new Set(["belt.belt1"]);
 
     const productionEntities = this.entities.filter(
-       (e) => producers.has(e.id) || directAddEntities.has(e.id)
+      (e) => producers.has(e.id) || directAddEntities.has(e.id)
     );
+
+    productionEntities.push(
+      new Entity(
+        {
+          Sid: "belt.belt2",
+          Note: "Belt2.png|Конвейер (ур. 2)|Сonveyor (lvl. 2)",
+          Sort: "3.01",
+          Research: "",
+          Ingredients: "IronDetails*1",
+          MaxHp: "1",
+          MaxBeltLength: "",
+        },
+        this.spriteData
+      ),
+      new Entity(
+        {
+          Sid: "belt.belt3",
+          Note: "Belt3.png|Конвейер (ур. 3)|Сonveyor (lvl. 3)",
+          Sort: "3.01",
+          Research: "",
+          Ingredients: "IronDetails*1",
+          MaxHp: "1",
+          MaxBeltLength: "",
+        },
+        this.spriteData
+      )
+    );
+
     const constructorEntityId = "constructor.1";
     const defaults: Defaults = {
       // beacon: "",
       // beaconModule: "",
       // cargoWagon: "",
       disabledRecipes: recipes
-         .filter((r) => r.id.endsWith("_alternative"))
-         .map((r) => r.id),
+        .filter((r) => r.id.endsWith("_alternative"))
+        .map((r) => r.id),
       // fluidWagon: "",
       fuel: "CarbonBrick",
-      maxBelt: "belt.belt1",
+      maxBelt: "belt.belt3",
       maxFactoryRank: [constructorEntityId],
       minBelt: "belt.belt1",
       minFactoryRank: [constructorEntityId],
@@ -83,14 +111,14 @@ export class Store {
     };
 
     const resourceIcons = this.resources
-       .filter((r) => r.icon)
-       .map((r) => r.icon!);
+      .filter((r) => r.icon)
+      .map((r) => r.icon!);
 
     const resourcesCategoryIcon = resourceIcons.find(
-       (i) => i.id === "Electronic"
+      (i) => i.id === "Electronic"
     )!;
     const entitiesCategoryIcon = this.entities.find(
-       (e) => e.id === constructorEntityId
+      (e) => e.id === constructorEntityId
     )!;
 
     const categoryIcons: Icon[] = [
@@ -111,18 +139,18 @@ export class Store {
       ],
       items: [
         ...this.resources
-           // .filter((r) => r.toRecipes(productionGroupsMap).length > 0)
-           .sort((a, b) => (a.weight > b.weight ? 1 : -1))
-           .map((r) => r.toItem()),
+          // .filter((r) => r.toRecipes(productionGroupsMap).length > 0)
+          .sort((a, b) => (a.weight > b.weight ? 1 : -1))
+          .map((r) => r.toItem()),
         ...productionEntities
-           .sort((a, b) => {
-             if (a.weight === b.weight) {
-               return a.id > b.id ? 1 : -1;
-             }
+          .sort((a, b) => {
+            if (a.weight === b.weight) {
+              return a.id > b.id ? 1 : -1;
+            }
 
-             return a.weight > b.weight ? 1 : -1;
-           })
-           .map((e) => e.toItem()),
+            return a.weight > b.weight ? 1 : -1;
+          })
+          .map((e) => e.toItem()),
       ],
       limitations: { "productivity-module": [] },
       recipes,

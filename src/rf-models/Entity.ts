@@ -72,11 +72,11 @@ export class Entity extends BaseEntity {
 
   public toItem(): Item {
     const item: Item = {
+      category: "entities",
       id: this.id,
       name: this.name,
-      category: "entities",
-      stack: 1, // not actual for the game
       row: this.row,
+      stack: 1, // not actual for the game
     };
 
     // belts
@@ -103,11 +103,12 @@ export class Entity extends BaseEntity {
     if (productionGroup) {
       const productionRawEntity = this.raw as ProductionEntity;
       item.factory = {
-        type: "electric",
-        mining: this.id.startsWith("mining") ? true : undefined,
-        speed: parseInt(productionRawEntity.SpeedScale, 10),
         category: productionGroup,
+        drain: 0,
+        mining: this.id.startsWith("mining") ? true : undefined,
         modules: 0,
+        speed: parseInt(productionRawEntity.SpeedScale, 10),
+        type: "electric",
         usage: parseInt(productionRawEntity.ElectricityConsumption, 10),
       };
     }
@@ -115,10 +116,10 @@ export class Entity extends BaseEntity {
     // drones
     if (this.id === "sawmill.drone1") {
       item.factory = {
-        type: "electric",
-        speed: 1,
         category: "drones",
         modules: 0,
+        speed: 1,
+        type: "electric",
         usage: 10,
       };
     }

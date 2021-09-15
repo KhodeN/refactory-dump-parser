@@ -8,4 +8,5 @@ export interface ItemFactory {
   speed: number;
   type?: "burner" | "heat" | "electric";
   usage?: number;
+  drain?: number;
 }

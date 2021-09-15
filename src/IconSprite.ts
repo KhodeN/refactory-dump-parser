@@ -27,7 +27,7 @@ export class IconSprite {
     for (let i = 0; i < icons.length; i += 1) {
       const icon = icons[i];
       const iconImage = await Jimp.read(`${this.savePath}/icons/${icon}`);
-      await iconImage.resize(this.iconSize, this.iconSize);
+      await iconImage.resize(this.iconSize, this.iconSize, Jimp.RESIZE_BEZIER);
       const { x, y } = this.getPosition(i, columns);
 
       await canvas.composite(iconImage, x, y);

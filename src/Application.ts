@@ -35,7 +35,7 @@ export class Application {
     // await this.downloadDump();
     // await this.csv2json();
     // await this.downloadIcons();
-    // await this.createIconSprite();
+    await this.createIconSprite();
     await this.convertToFactorioLabFormat();
 
     console.log(`\nDone. Files are available in ${this.outPath}`);
@@ -73,7 +73,13 @@ export class Application {
 
   @logAsyncMethod("Creating icon sprite")
   private async createIconSprite() {
+    await copyFile(`./src/belts/Belt2.png`, `${this.savePath}/icons/Belt2.png`);
+    await copyFile(`./src/belts/Belt3.png`, `${this.savePath}/icons/Belt3.png`);
+
     const icons = await this._getIconsFromDump();
+    icons.add("Belt2.png");
+    icons.add("Belt3.png");
+
     const sprite = new IconSprite(icons, 64, this.savePath);
     await sprite.generate(`${this.savePath}/sprite.png`);
   }
